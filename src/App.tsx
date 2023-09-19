@@ -4,12 +4,43 @@ import React, { useState, useEffect } from 'react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useMsal } from '@azure/msal-react';
+import Cookies from 'universal-cookie';
+
+
+const loginRequest = {
+    scopes: [],
+};
+
+const cookies = new Cookies(null, { path: '/' });
+
+
+
+const MsContent = () => {
+
+    const { instance } = useMsal();
+
+    const activeAccount = instance.getActiveAccount();
+  
+    return(
+    <div>
+        {activeAccount ? (
+            <div>
+                <p>Name: {activeAccount.name}</p>
+                <p>User Name: {activeAccount.username}</p>
+            </div>
+            )  : <p>No user on Microsoft</p>
+        }
+        </div>
+    );
+  
+};
 
 function App() {
     const [ user, setUser ] = useState([]);
     const [ profile, setProfile ] = useState([]);
-
     const { instance } = useMsal();
+
+    
     
     const login = useGoogleLogin({
         onSuccess: (codeResponse) => setUser(codeResponse),
@@ -17,8 +48,18 @@ function App() {
     });
 
     const msLogin = () => {
-        instance.loginRedirect();
-      };
+        instance.loginRedirect({
+            ...loginRequest,
+            prompt: 'create',
+        }).then ( () => {
+            const { instance } = useMsal();
+
+            const activeAccount = instance.getActiveAccount();
+            cookies.set("token", activeAccount ? activeAccount.username : "none", { httpOnly: true } )
+        }
+        )
+        .catch((error) => console.log(error));  
+    };          
 
     useEffect(
         () => {
@@ -66,6 +107,10 @@ function App() {
                     <button onClick={() => msLogin()}>Sign in with Microsoft 🚀 </button>
                 </div>
             )}
+            <p>Microsoft</p>
+            <MsContent/>
+            <br />
+            
         </div>
     );
 }
