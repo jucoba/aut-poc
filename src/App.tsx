@@ -3,15 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { googleLogout, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
+import { useMsal } from '@azure/msal-react';
 
 function App() {
     const [ user, setUser ] = useState([]);
     const [ profile, setProfile ] = useState([]);
 
+    const { instance } = useMsal();
+    
     const login = useGoogleLogin({
         onSuccess: (codeResponse) => setUser(codeResponse),
         onError: (error) => console.log('Login Failed:', error)
     });
+
+    const msLogin = () => {
+        instance.loginRedirect();
+      };
 
     useEffect(
         () => {
@@ -54,7 +61,10 @@ function App() {
                     <button onClick={logOut}>Log out</button>
                 </div>
             ) : (
-                <button onClick={() => login()}>Sign in with Google 🚀 </button>
+                <div>
+                    <button onClick={() => login()}>Sign in with Google 🚀 </button>
+                    <button onClick={() => msLogin()}>Sign in with Microsoft 🚀 </button>
+                </div>
             )}
         </div>
     );
