@@ -40,10 +40,16 @@ function App() {
     const [ profile, setProfile ] = useState([]);
     const { instance } = useMsal();
 
+    const finishLogin = (codeResponse) => {
+        setUser(codeResponse);
+        console.log(codeResponse);
+
+    }
+
     
     
     const login = useGoogleLogin({
-        onSuccess: (codeResponse) => setUser(codeResponse),
+        onSuccess: (codeResponse) => finishLogin(codeResponse),
         onError: (error) => console.log('Login Failed:', error)
     });
 
